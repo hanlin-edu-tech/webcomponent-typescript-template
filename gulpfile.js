@@ -134,10 +134,10 @@ async function serve() {
 }
 
 exports.clean = clean;
-exports.build = gulp.series(buildHtml, buildCss, buildJs);
-exports.package = gulp.series(clean, exports.build);
+exports.build = gulp.series(clean, buildHtml, buildCss, buildJs);
 exports.compress = gulp.series(minifyHtml, minifyCss, uglifyAndBabelJs);
 
-exports.dev = gulp.series(exports.package, serve, watchFiles);
+exports.productionBuild = gulp.series(exports.build, exports.compress);
+exports.uploadGcs = gulp.parallel(uploadGcsTest, uploadGcsAlpha);
 
-exports.buildForGcs = gulp.series(exports.package, exports.compress, gulp.parallel(uploadGcsTest, uploadGcsAlpha));
+exports.dev = gulp.series(exports.build, serve, watchFiles);
