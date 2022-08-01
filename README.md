@@ -12,15 +12,19 @@
 ```
 git clone git@github.com:hanlin-edu-tech/webcomponent-typescript-template.git
 ```
-2. 安裝依賴項目
+2. 使用 [nvm](https://github.com/nvm-sh/nvm) 切換到正確的 node 版本
+```
+nvm use
+```
+3. 安裝依賴項目
 ```
 npm install
 ```
-3. 啟動開發環境
+4. 啟動開發環境
 ```
 gulp dev
 ```
-4. 完畢！記得閱讀下方文件說明，Happy Coding!
+5. 完畢！記得閱讀下方文件說明，Happy Coding!
 
 ## 參數設定
 所有可自訂化的環境變數皆獨立寫在 `env.js` 中，包含 gcp 上傳的機器、bundle 後的文件名稱...等
