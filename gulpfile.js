@@ -90,11 +90,11 @@ function minifyCss() {
 }
 
 function uploadGcsTest() {
-    uploadToGcs(env.TUTOR_TEST_MACHINE);
+    return uploadToGcs(env.TUTOR_TEST_MACHINE);
 }
 
 function uploadGcsAlpha() {
-    uploadToGcs(env.ALPHA_MACHINE);
+    return uploadToGcs(env.ALPHA_MACHINE);
 }
 
 function watchFiles() {
