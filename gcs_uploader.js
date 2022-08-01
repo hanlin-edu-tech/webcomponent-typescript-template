@@ -1,6 +1,7 @@
 const {Storage} = require("@google-cloud/storage");
 const fs = require("fs");
 const path = require("path");
+const gulp = require("gulp")
 
 
 async function uploadToGcs(machine) {
@@ -20,6 +21,7 @@ async function uploadToGcs(machine) {
 
 
 async function loopThroughFolderRecursive(basePath, arr = []) {
+
     const files = fs.readdirSync(basePath);
 
     for (const f of files) {

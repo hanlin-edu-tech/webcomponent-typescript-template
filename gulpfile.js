@@ -13,22 +13,21 @@ const cleanCss = require("gulp-clean-css");
 const babel = require("gulp-babel");
 const env = require("./env");
 const glob = require("glob");
+const debug = require('gulp-debug');
 
-async function clean() {
-    await del(["dist", "build"]);
+function clean() {
+    return del(["dist", "build"]);
 }
 
 function buildHtml() {
-    return fileCopyTask(
-        gulp.src("src/html/index.html")
-            .pipe(gulp.dest("build"))
-    );
+    return gulp.src("src/html/index.html")
+        .pipe(gulp.dest("build"));
 }
 
 function buildCss() {
-    return fileCopyTask(gulp.src("src/scss/**.scss")
+    return gulp.src("src/scss/**.scss")
         .pipe(gulpSass())
-        .pipe(gulp.dest("build/css")));
+        .pipe(gulp.dest("build/css"));
 }
 
 async function buildJs() {
@@ -39,18 +38,27 @@ async function buildJs() {
 function tsToJs() {
     const tsFiles = glob.sync('./src/**/**.ts');
 
-    return fileCopyTask(
-        browserify({
-            entries: tsFiles,
-            cache: {},
-            packageCache: {},
-        })
-            .plugin(tsify)
-            .bundle()
-            .pipe(source(env.TS_OUT))
-            .pipe(gulp.dest("build/js"))
-    );
+    return callBackOnFileCopied(browserify({
+        entries: tsFiles,
+        cache: {},
+        packageCache: {},
+    })
+        .plugin(tsify)
+        .bundle()
+        .pipe(source(env.TS_OUT))
+        .pipe(gulp.dest("build/js")));
 }
+
+
+// 推論是因為 browserify 的關係，沒有使用原生 gulp pipe 導致文件在還沒複製完畢時就觸發下一個 task，因此特別使用 promise - resolve 的方式，聆聽 end event 後才結束這個 task
+function callBackOnFileCopied(task) {
+    return new Promise((resolve, reject) => {
+        task.on("end", () => {
+            resolve();
+        });
+    });
+}
+
 
 function babelJs() {
     return gulp.src("build/js/**.js")
@@ -61,50 +69,35 @@ function babelJs() {
 }
 
 function uglifyAndBabelJs() {
-    return fileCopyTask(
-        gulp.src(`build/js/${env.TS_OUT}`)
-            .pipe(uglify())
-            .pipe(gulp.dest(`dist/js`))
-    );
+    return gulp.src(`build/js/${env.TS_OUT}`)
+        .pipe(uglify())
+        .pipe(gulp.dest(`dist/js`));
 }
 
 function minifyHtml() {
-    return fileCopyTask(
-        gulp.src("build/**.html")
-            .pipe(htmlMin({
-                collapseWhitespace: true
-            }))
-            .pipe(gulp.dest("dist"))
-    );
+    return gulp.src("build/**.html")
+        .pipe(htmlMin({
+            collapseWhitespace: true
+        }))
+        .pipe(gulp.dest("dist"));
 }
 
 
-async function minifyCss() {
-    return fileCopyTask(
-        gulp.src("build/css/*.css")
-            .pipe(cleanCss({compatibility: 'ie8'}))
-            .pipe(gulp.dest("dist/css"))
-    );
+function minifyCss() {
+    return gulp.src("build/css/*.css")
+        .pipe(cleanCss({compatibility: 'ie8'}))
+        .pipe(gulp.dest("dist/css"));
 }
 
-// 使用原生 async await 會導致文件在還沒複製完畢時就觸發下一個 task，因此特別使用 promise - resolve 的方式，聆聽 end event 後才結束這個 task
-function fileCopyTask(task) {
-    return new Promise((resolve, reject) => {
-        task.on("end", () => {
-            resolve();
-        });
-    });
+function uploadGcsTest() {
+    uploadToGcs(env.TUTOR_TEST_MACHINE);
 }
 
-async function uploadGcsTest() {
-    await uploadToGcs(env.TUTOR_TEST_MACHINE);
+function uploadGcsAlpha() {
+    uploadToGcs(env.ALPHA_MACHINE);
 }
 
-async function uploadGcsAlpha() {
-    await uploadToGcs(env.ALPHA_MACHINE);
-}
-
-async function watchFiles() {
+function watchFiles() {
     watch("./src/scss/*.scss").on("change", async () => {
         await buildCss();
         await reloadBrowser();
@@ -121,11 +114,11 @@ async function watchFiles() {
     });
 }
 
-async function reloadBrowser() {
+function reloadBrowser() {
     browserSync.reload();
 }
 
-async function serve() {
+function serve() {
     browserSync.init({
         server: {
             baseDir: "build"
