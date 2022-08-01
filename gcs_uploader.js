@@ -9,14 +9,33 @@ async function uploadToGcs(machine) {
     });
 
     const filePaths = await loopThroughFolderRecursive("dist");
+    const tasks = [];
 
-    for (const p of filePaths) {
-        await storage.bucket(machine.bucketName).upload(p, {
-            destination: path.join(machine.gcsPath, p),
-        });
-    }
+    for (const filePath of filePaths)
+        tasks.push(uploadFile(storage, machine, filePath, 3));
+
+    return Promise.all(tasks);
 }
 
+async function uploadFile(storage, machine, filePath, maxFails) {
+    for (let i = 0; i < maxFails; i++) {
+        try {
+            await storage.bucket(machine.bucketName).upload(filePath, {
+                destination: path.join(machine.gcsPath, filePath),
+            });
+            return;
+        } catch (e) {
+            console.warn(`Error while uploading ${filePath} to ${machine.projectId}, retrying...`)
+            await sleep(1000);
+        }
+    }
+
+    console.error(`Error while uploading ${filePath} to ${machine.projectId}, tried ${maxFails} times, gave up.`);
+}
+
+function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
 
 async function loopThroughFolderRecursive(basePath, arr = []) {
 
