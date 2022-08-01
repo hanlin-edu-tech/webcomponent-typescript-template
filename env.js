@@ -1,7 +1,6 @@
 //將所有 typescript 整合且 browserify 後的文件名稱 (通常不必變化)
 exports.TS_OUT = "bundle.js";
 
-
 exports.ALPHA_MACHINE = {
     projectId: 'a-alpha-312605',
     bucketName: 'a-dev-apps',

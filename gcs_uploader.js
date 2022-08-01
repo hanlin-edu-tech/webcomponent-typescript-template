@@ -1,8 +1,6 @@
 const {Storage} = require("@google-cloud/storage");
 const fs = require("fs");
 const path = require("path");
-const gulp = require("gulp")
-
 
 async function uploadToGcs(machine) {
     const storage = new Storage({
