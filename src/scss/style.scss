@@ -1,0 +1,36 @@
+body {
+  min-height: 100vh;
+}
+
+.box {
+  width: 100%;
+  padding-top: 56.25%; //16:9
+  position: relative;
+}
+
+.box-in {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+#controllers {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+
+#buttons {
+  position: absolute;
+  z-index: 20000;
+}
+
+.text-center {
+  text-align: center;
+}
